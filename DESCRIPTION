@@ -1,0 +1,17 @@
+Package: scrambler
+Title: Scramble Data for Easy Sharing
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Martin",
+           family = "Gerdin Wärnberg",
+           role = c("aut", "cre"),
+           email = "martingerdin@gmail.com")
+Description: This package takes a dataset and returns a scrambled dataset that 
+    can be safely shared.
+License: `use_gpl3_license()`
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: 
+    R (>= 2.10)
