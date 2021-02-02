@@ -10,6 +10,11 @@
 #' @param only.unique Logical. If TRUE the number of observations in
 #'     the returned dataset is equal to the largest number of unique
 #'     values across columns. Defaults to FALSE.
+#' @param size Numeric or NULL. If not NULL `size` is the number of
+#'     observations in the returned dataset. If NULL the number of
+#'     observations in the returned dataset will be equal to the
+#'     number of observations in the original dataset. Defaults to
+#'     NULL.
 #' @param check.identical Logical. If TRUE `scramble` checks that no
 #'     observation in the original dataset is present in the scrambled
 #'     dataset. The probability that this would happen is of course
@@ -19,14 +24,23 @@
 #' @return A `data.frame`.
 #' @import assertthat
 #' @export
-scramble <- function(original.data, only.unique = FALSE, check.identical = TRUE) {
+scramble <- function(original.data, only.unique = FALSE, size = NULL, check.identical = TRUE) {
     ## Check arguments
     assert_that(is.data.frame(original.data))
     ## Synthesize data
     scrambled.data <- synthesize_data(original.data, only.unique = only.unique)
     ## Scramble data
     scrambled.data[] <- lapply(scrambled.data, scramble_column)
-    ## Check that no observation is remains unchanged
+    ## Modify size
+    if (!is.null(size)) {
+        replace <- FALSE
+        if (size > nrow(scrambled.data)) {
+            message("size is larger than the number of observations in the data, draws will be made with replacement")
+            replace = TRUE
+        }
+        scrambled.data <- scrambled.data[sample(1:nrow(scrambled.data), size, replace = replace), ]
+    }
+        ## Check that no observation is remains unchanged
     if (check.identical)
         any_identical(original.data, scrambled.data)
     ## Return
