@@ -12,7 +12,8 @@ test_that("scramble returns a data.frame that is different from the original", {
 test_that("any_identical correctly detects remaining original observation", {
     original.data <- test.data[1:10,]
     scrambled.data <- original.data
-    scrambled.data[] <- lapply(original.data, scramble_column)
+    scrambled.data <- synthesize_data(original.data)
+    scrambled.data[] <- lapply(scrambled.data, scramble_column)
     scrambled.data[10, ] <- original.data[10, ]
     expect_error(any_identical(original.data, scrambled.data),
                  "Observations from the original data still exist in the scrambled data, try again.")
