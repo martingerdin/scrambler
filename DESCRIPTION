@@ -16,6 +16,7 @@ RoxygenNote: 7.1.1
 Depends: 
     R (>= 2.10)
 Imports: 
-    assertthat (>= 0.2.1)
+    assertthat (>= 0.2.1),
+    Hmisc (>= 4.4.2)
 Suggests: 
     testthat
