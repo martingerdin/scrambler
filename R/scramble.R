@@ -7,6 +7,9 @@
 #' columns present in the original dataset are lost.
 #'
 #' @param original.data Data.frame. The original data. No default.
+#' @param only.unique Logical. If TRUE the number of observations in
+#'     the returned dataset is equal to the largest number of unique
+#'     values across columns. Defaults to FALSE.
 #' @param check.identical Logical. If TRUE `scramble` checks that no
 #'     observation in the original dataset is present in the scrambled
 #'     dataset. The probability that this would happen is of course
@@ -16,13 +19,11 @@
 #' @return A `data.frame`.
 #' @import assertthat
 #' @export
-scramble <- function(original.data, check.identical = TRUE ) {
+scramble <- function(original.data, only.unique = FALSE, check.identical = TRUE) {
     ## Check arguments
     assert_that(is.data.frame(original.data))
-    ## Initiate new dataset
-    scrambled.data <- original.data
     ## Synthesize data
-    scrambled.data <- synthesize_data(original.data)
+    scrambled.data <- synthesize_data(original.data, only.unique = only.unique)
     ## Scramble data
     scrambled.data[] <- lapply(scrambled.data, scramble_column)
     ## Check that no observation is remains unchanged
@@ -38,11 +39,16 @@ scramble_column <- function(column) {
     scrambled.column
 }
 
-synthesize_data <- function(original.data) {
+synthesize_data <- function(original.data, only.unique) {
     n <- nrow(original.data)
-    unique.values <- lapply(original.data, unique)
-    synthesized.data <- original.data
-    synthesized.data[] <- lapply(unique.values, rep, length.out = n)
+    unique.values <- lapply(original.data, function(column) as.character(unique(column)))
+    classes <- lapply(original.data, class)
+    if (only.unique)
+        n <- max(sapply(unique.values, length))
+    synthesized.data <- as.data.frame(do.call(cbind, lapply(unique.values, rep, length.out = n)))
+    synthesized.data[] <- lapply(seq_along(classes), function(i) {
+        match.fun(paste0("as.", classes[[i]]))(synthesized.data[, i])
+    })
     synthesized.data
 }
 
