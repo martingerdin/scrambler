@@ -27,6 +27,9 @@
 scramble <- function(original.data, only.unique = FALSE, size = NULL, check.identical = TRUE) {
     ## Check arguments
     assert_that(is.data.frame(original.data))
+    assert_that(is.logical(only.unique))
+    assert_that(is.numeric(size) | is.null(size))
+    assert_that(is.logical(check.identical))
     ## Synthesize data
     scrambled.data <- synthesize_data(original.data, only.unique = only.unique)
     ## Scramble data
