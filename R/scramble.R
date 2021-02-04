@@ -31,17 +31,23 @@ scramble <- function(original.data, only.unique = FALSE, size = NULL, check.iden
     assert_that(is.numeric(size) | is.null(size))
     assert_that(is.logical(check.identical))
     ## Synthesize data
-    scrambled.data <- synthesize_data(original.data, only.unique = only.unique)
+    unique.values <- lapply(original.data, function(column) as.character(unique(column)))
+    max.unique.n <- max(sapply(unique.values, length))
+    scrambled.data <- synthesize_data(original.data,
+                                      only.unique = only.unique,
+                                      unique.values = unique.values,
+                                      max.unique.n = max.unique.n)
     ## Scramble data
     scrambled.data[] <- lapply(scrambled.data, scramble_column)
     ## Modify size
     if (!is.null(size)) {
-        replace <- FALSE
         if (size > nrow(scrambled.data)) {
             message("size is larger than the number of observations in the data, draws will be made with replacement")
-            replace = TRUE
+            scrambled.data <- rbind(scrambled.data,
+                                    scrambled.data[sample(1:nrow(scrambled.data),
+                                                          size - nrow(scrambled.data),
+                                                          replace = TRUE)])
         }
-        scrambled.data <- scrambled.data[sample(1:nrow(scrambled.data), size, replace = replace), ]
     }
         ## Check that no observation is remains unchanged
     if (check.identical)
@@ -56,12 +62,11 @@ scramble_column <- function(column) {
     scrambled.column
 }
 
-synthesize_data <- function(original.data, only.unique) {
+synthesize_data <- function(original.data, only.unique, unique.values, max.unique.n) {
     n <- nrow(original.data)
-    unique.values <- lapply(original.data, function(column) as.character(unique(column)))
-    classes <- lapply(original.data, class)
     if (only.unique)
-        n <- max(sapply(unique.values, length))
+        n <- max.unique.n
+    classes <- lapply(original.data, class)
     synthesized.data <- as.data.frame(do.call(cbind, lapply(unique.values, rep, length.out = n)))
     synthesized.data[] <- lapply(seq_along(classes), function(i) {
         match.fun(paste0("as.", classes[[i]]))(synthesized.data[, i])
